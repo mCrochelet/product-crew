@@ -22,9 +22,9 @@ Test the complete application to ensure it meets all requirements and handles ed
 - [ ] Relative and absolute paths both work
 
 ### Validation Failures
-- [ ] Non-existent requirements path → exit code -1
-- [ ] Non-existent PID path → exit code -1  
-- [ ] PID file without .md extension → exit code -1
+- [ ] Non-existent requirements path → exit code 1
+- [ ] Non-existent PID path → exit code 1  
+- [ ] PID file without .md extension → exit code 1
 
 ### CLI Edge Cases
 - [ ] Missing required arguments

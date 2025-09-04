@@ -1,5 +1,6 @@
 import os
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Tuple
 
@@ -31,6 +32,38 @@ def validate_pid_path(pid_path: str) -> Path:
     if not path.suffix.lower() == '.md':
         raise ValueError(f"PID file must be a markdown file (.md extension): {path}")
     return path
+
+
+def get_output_file_path(original_path: Path, overwrite: bool) -> Path:
+    """Determine the output file path based on overwrite flag."""
+    if overwrite:
+        return original_path
+    
+    # Create new file with timestamp
+    today = datetime.now().strftime('%Y-%m-%d')
+    stem = original_path.stem  # filename without extension
+    suffix = original_path.suffix  # file extension
+    parent = original_path.parent  # directory
+    
+    new_filename = f"{stem}-{today}{suffix}"
+    return parent / new_filename
+
+
+def create_pid_file(output_path: Path, content: str) -> None:
+    """Create or overwrite the PID file with the given content."""
+    try:
+        # Ensure parent directory exists
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Write content to file
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write(content)
+            
+        click.echo(f"PID file created: {output_path}")
+        
+    except (IOError, OSError, PermissionError) as e:
+        click.echo(f"Failed to create file {output_path}: {e}", err=True)
+        sys.exit(1)
 
 
 def create_path_printer_agent() -> Agent:
@@ -68,20 +101,32 @@ def create_print_paths_task(requirements_path: Path, pid_path: Path, overwrite: 
 
 
 def run_crew(requirements_path: Path, pid_path: Path, overwrite: bool) -> None:
-    """Run CrewAI agent to print the validated paths."""
+    """Run CrewAI agent to process PID file and create output."""
     try:
         # Load environment variables
         load_environment()
+        
+        # Determine output file path
+        output_path = get_output_file_path(pid_path, overwrite)
+        
+        # Read the original PID file content
+        try:
+            with open(pid_path, 'r', encoding='utf-8') as f:
+                original_content = f.read()
+        except (IOError, OSError) as e:
+            click.echo(f"Failed to read PID file {pid_path}: {e}", err=True)
+            sys.exit(1)
 
         # Check if OpenAI API key is available
         if not os.getenv("OPENAI_API_KEY"):
-            click.echo("Warning: No OpenAI API key found. Falling back to direct printing.", err=True)
+            click.echo("Warning: No OpenAI API key found. Using direct file copy.", err=True)
+            create_pid_file(output_path, original_content)
             print(str(requirements_path))
             print(str(pid_path))
             print(overwrite)
             return
 
-        # Create the agent and task
+        # Create the agent and task for processing the PID content
         agent = create_path_printer_agent()
         task = create_print_paths_task(requirements_path, pid_path, overwrite)
 
@@ -92,11 +137,14 @@ def run_crew(requirements_path: Path, pid_path: Path, overwrite: bool) -> None:
             verbose=False
         )
 
-        # Run the crew but still print the expected output format
-        # since the agent might add additional text
+        # Run the crew (for now just processing, later will generate content)
         crew.kickoff()
+        
+        # For now, create the output file with original content
+        # In future tasks, this will be enhanced with agent-generated content
+        create_pid_file(output_path, original_content)
 
-        # Ensure we always output in the expected format
+        # Print the expected output format
         print(str(requirements_path))
         print(str(pid_path))
         print(overwrite)
@@ -129,7 +177,7 @@ def cli(requirements_path: str, pid_path: str, overwrite: bool) -> None:
 
     except ValueError as e:
         click.echo(str(e), err=True)
-        sys.exit(-1)
+        sys.exit(1)
 
 
 if __name__ == '__main__':

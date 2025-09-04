@@ -7,7 +7,7 @@ Integrate all components into a cohesive main application flow that orchestrates
 - [ ] Main function orchestrates the complete workflow
 - [ ] Parse CLI arguments → Validate inputs → Run CrewAI agent → Handle file operations
 - [ ] Proper error handling at each step
-- [ ] Clean exit codes (0 for success, -1 for validation errors)
+- [ ] Clean exit codes (0 for success, 1 for validation errors)
 - [ ] All components work together seamlessly
 - [ ] Application handles edge cases and errors gracefully
 

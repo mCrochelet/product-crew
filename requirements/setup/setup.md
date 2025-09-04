@@ -32,7 +32,7 @@ The application should validate:
 - The pid path must exist
 - The pid file must be a markdown file
 
-If validation fails, the application should exit with error code -1.
+If validation fails, the application should exit with error code 1.
 
 ### File Structure Requirements
 

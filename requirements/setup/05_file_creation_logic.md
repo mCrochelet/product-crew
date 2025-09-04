@@ -13,7 +13,7 @@ Implement file creation/overwriting logic based on the `--overwrite` flag for th
 
 ## Implementation Details
 - Use `datetime.now().strftime('%Y-%m-%d')` for date formatting
-- For new file creation, modify filename like: `original-name-2025-01-15.md`
+- For new file creation, modify filename like: `original-name-2025-0115.md`
 - Use `pathlib.Path` for robust file path manipulation
 - Ensure the new file is created in the same directory as the original
 - Handle potential file write permissions and disk space issues
@@ -21,7 +21,7 @@ Implement file creation/overwriting logic based on the `--overwrite` flag for th
 ## Examples
 Original file: `/path/to/initiative.md`
 - If `--overwrite`: overwrite `/path/to/initiative.md`
-- If not `--overwrite`: create `/path/to/initiative-2025-01-15.md`
+- If not `--overwrite`: create `/path/to/initiative-2025-0115.md`
 
 ## Definition of Done
 - Overwrite functionality works when flag is set

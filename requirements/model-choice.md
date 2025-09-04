@@ -6,4 +6,6 @@ argument to the CLI.
 # Acceptance criteria
 
 only valid models from OPENAI are accepted
-the CLI should exit with error code -1 if the model is not valid
+the CLI should exit with error code 1 if the model is not valid
+by default, the CLI should use the model gpt-5
+The argument is optional

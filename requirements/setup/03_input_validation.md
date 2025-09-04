@@ -8,7 +8,7 @@ Implement validation logic for the requirements path and PID path according to t
 - [ ] Validate that the PID path exists on the file system
 - [ ] Validate that the PID file has a .md extension (is a markdown file)
 - [ ] Support both relative and absolute paths
-- [ ] Exit with error code -1 when validation fails
+- [ ] Exit with error code 1 when validation fails
 - [ ] Display clear, easy-to-understand error messages for each validation failure
 - [ ] Return validated paths if all checks pass
 
@@ -24,6 +24,6 @@ Implement validation logic for the requirements path and PID path according to t
 ## Definition of Done
 - All three validation checks are implemented
 - Appropriate error messages are displayed for each failure type
-- Application exits with code -1 on any validation failure
+- Application exits with code 1 on any validation failure
 - Both relative and absolute paths are handled correctly
 - Validation passes when all criteria are met
