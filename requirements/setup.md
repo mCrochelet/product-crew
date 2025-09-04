@@ -1,0 +1,65 @@
+# Problem to solve
+
+As a developer, I can kick off a new run of the crew by providing the
+following information:
+
+- requirements: the path to the project requirements folder
+- pid: the path to the product initiative to refine
+- overwrite: boolean. If true, the pid file will be overwritten,
+  otherwise a new one will be created next to the pid file.
+
+# Proposed solution
+
+The crew run should be limited to a simple crewai agent that will print the
+paths provided as arguments.
+The arguments should be validated, and the application should exit with an error
+if the arguments are not valid.
+
+# Requirements criteria
+
+The `requirements` folder can contain both directories and files.
+Each subfolder in requirements may contain one or multiple files.
+Each file must be in markdown.
+Each file describes either an initiative or a task.
+A file describes an initiative if either:
+
+- it is a child of `requirements` or
+- it has the same name as the subfolder it belongs to
+
+Otherwise, it describes a task.
+Each task file must be named after the task it describes and start with the
+number of the task (sequentially: 1, 2, 3, ...).
+
+In a subfolder, there should always be one file with the same name as the
+subfolder, serving as the main file for the requirements.
+Then, there may one or multiple files describing the tasks that need to be
+done to fulfill the requirements.
+The paths provided as arguments should exist on the file system and be markdown
+files.
+Paths can be relative or absolute.
+Error messages should be easy to understand.
+A template for a pid can be found README.md file in the root of the project.
+
+# Technical requirements
+
+The application should be written in Python 3.13.
+It should use CrewAI to orchestrate the crews.
+It should be a command line application.
+
+# Acceptance criteria
+
+When overwrite=false and creating a new file next to the pid file, append the
+date `YYYY-MM-DD` to the file name.
+The application should be executed with the following command:
+`product-crew -r requirements_path -pid pid_path [--overwrite]`
+Task file names should be sequential, following the numbering of the tasks 
+and with format `[number]_[task_name_in_snake_case].md` where `[number]` 
+follows the format `0[number]` if the number is less than 10, and format 
+`[number]` otherwise.
+The crewai agent should print the paths provided as arguments as raw strings.
+Validation of the arguments should be limited to the following:
+- the requirements path must exist
+- the pid path must exist
+- the pid file must be a markdown file
+
+Otherwise, the application should exit with error code -1

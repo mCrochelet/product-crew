@@ -1,0 +1,2 @@
+[console_scripts]
+product-crew = main:cli

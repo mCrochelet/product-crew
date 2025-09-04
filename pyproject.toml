@@ -1,0 +1,15 @@
+[project]
+name = "product-crew"
+version = "0.1.0"
+description = "A team of agents acting as a senior product trio to discover, research and design product initiative documents"
+requires-python = ">=3.13"
+dependencies = [
+    "crewai>=0.28.0",
+    "click>=8.0.0",
+]
+
+[project.scripts]
+product-crew = "main:cli"
+
+[tool.uv]
+package = true
