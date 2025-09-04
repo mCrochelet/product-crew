@@ -1,9 +1,0 @@
-README.md
-main.py
-pyproject.toml
-product_crew.egg-info/PKG-INFO
-product_crew.egg-info/SOURCES.txt
-product_crew.egg-info/dependency_links.txt
-product_crew.egg-info/entry_points.txt
-product_crew.egg-info/requires.txt
-product_crew.egg-info/top_level.txt

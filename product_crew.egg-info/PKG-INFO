@@ -1,7 +1,0 @@
-Metadata-Version: 2.4
-Name: product-crew
-Version: 0.1.0
-Summary: A team of agents acting as a senior product trio to discover, research and design product initiative documents
-Requires-Python: >=3.13
-Requires-Dist: crewai>=0.28.0
-Requires-Dist: click>=8.0.0
