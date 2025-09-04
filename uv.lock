@@ -1525,12 +1525,14 @@ source = { editable = "." }
 dependencies = [
     { name = "click" },
     { name = "crewai" },
+    { name = "python-dotenv" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "click", specifier = ">=8.0.0" },
     { name = "crewai", specifier = ">=0.28.0" },
+    { name = "python-dotenv", specifier = ">=1.0.0" },
 ]
 
 [[package]]
