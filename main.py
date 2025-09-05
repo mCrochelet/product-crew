@@ -100,14 +100,34 @@ def create_print_paths_task(requirements_path: Path, pid_path: Path, overwrite: 
     )
 
 
-def run_crew(requirements_path: Path, pid_path: Path, overwrite: bool) -> None:
+def demo_pause(message: str, step: str = "") -> None:
+    """Pause execution in demo mode and wait for user input."""
+    try:
+        if step:
+            click.echo(f"\n{click.style('=== DEMO MODE ===', fg='cyan', bold=True)} {click.style(step, fg='yellow')}")
+        click.echo(f"{click.style('📍', fg='blue')} {message}")
+        click.echo(f"{click.style('Press Enter to continue, or Ctrl+C to exit...', fg='green')}", nl=False)
+        input()
+        click.echo()  # Add blank line after input
+    except KeyboardInterrupt:
+        click.echo(f"\n{click.style('Demo mode interrupted by user. Exiting...', fg='red')}")
+        sys.exit(0)
+
+
+def run_crew(requirements_path: Path, pid_path: Path, overwrite: bool, demo: bool = False) -> None:
     """Run CrewAI agent to process PID file and create output."""
     try:
+        if demo:
+            demo_pause("Starting product crew execution", "Step 1/5")
+        
         # Load environment variables
         load_environment()
         
         # Determine output file path
         output_path = get_output_file_path(pid_path, overwrite)
+        
+        if demo:
+            demo_pause(f"Output file determined: {output_path}", "Step 2/5")
         
         # Read the original PID file content
         try:
@@ -119,6 +139,8 @@ def run_crew(requirements_path: Path, pid_path: Path, overwrite: bool) -> None:
 
         # Check if OpenAI API key is available
         if not os.getenv("OPENAI_API_KEY"):
+            if demo:
+                demo_pause("Warning: No OpenAI API key found. Using direct file copy mode", "Step 3/5")
             click.echo("Warning: No OpenAI API key found. Using direct file copy.", err=True)
             create_pid_file(output_path, original_content)
             print(str(requirements_path))
@@ -126,17 +148,26 @@ def run_crew(requirements_path: Path, pid_path: Path, overwrite: bool) -> None:
             print(overwrite)
             return
 
+        if demo:
+            demo_pause("Creating CrewAI agents and tasks", "Step 3/5")
+        
         # Create the agent and task for processing the PID content
         agent = create_path_printer_agent()
         task = create_print_paths_task(requirements_path, pid_path, overwrite)
 
+        if demo:
+            demo_pause("Initializing crew with agents and tasks", "Step 4/5")
+        
         # Create and run the crew
         crew = Crew(
             agents=[agent],
             tasks=[task],
-            verbose=False
+            verbose=demo
         )
 
+        if demo:
+            demo_pause("Executing crew tasks (this may take a moment)", "Step 5/5")
+        
         # Run the crew (for now just processing, later will generate content)
         crew.kickoff()
         
@@ -144,12 +175,17 @@ def run_crew(requirements_path: Path, pid_path: Path, overwrite: bool) -> None:
         # In future tasks, this will be enhanced with agent-generated content
         create_pid_file(output_path, original_content)
 
+        if demo:
+            demo_pause("Crew execution completed successfully!", "Completion")
+
         # Print the expected output format
         print(str(requirements_path))
         print(str(pid_path))
         print(overwrite)
 
     except Exception as e:
+        if demo:
+            demo_pause(f"Error occurred: {e}. Falling back to direct output.", "Error Handling")
         click.echo(f"CrewAI execution error: {e}", err=True)
         # Fallback to direct printing on any error
         print(str(requirements_path))
@@ -164,7 +200,9 @@ def run_crew(requirements_path: Path, pid_path: Path, overwrite: bool) -> None:
               help='Path to the product initiative to refine')
 @click.option('--overwrite', is_flag=True, default=False,
               help='If true, the pid file will be overwritten, otherwise a new one will be created')
-def cli(requirements_path: str, pid_path: str, overwrite: bool) -> None:
+@click.option('--demo', is_flag=True, default=False,
+              help='Enable interactive demo mode')
+def cli(requirements_path: str, pid_path: str, overwrite: bool, demo: bool) -> None:
     """Product crew CLI application."""
 
     try:
@@ -173,7 +211,7 @@ def cli(requirements_path: str, pid_path: str, overwrite: bool) -> None:
         validated_pid_path = validate_pid_path(pid_path)
 
         # Initialize and run CrewAI agent to print paths
-        run_crew(validated_requirements_path, validated_pid_path, overwrite)
+        run_crew(validated_requirements_path, validated_pid_path, overwrite, demo)
 
     except ValueError as e:
         click.echo(str(e), err=True)
