@@ -27,11 +27,17 @@ uv sync --extra test
 # Run the application
 uv run product-crew -r <requirements_path> --pid <pid_path> [--overwrite]
 
-# Run tests
-uv run pytest
+# Run tests (quiet mode, suppresses CrewAI/Pydantic warnings)
+uv run pytest -q
+
+# Run tests with full output
+uv run pytest -v
 
 # Run tests with coverage
 uv run pytest --cov=main --cov-report=term-missing
+
+# Run tests quietly with coverage
+uv run pytest -q --cov=main --cov-report=term-missing
 ```
 
 ### Application Usage

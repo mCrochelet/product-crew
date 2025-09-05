@@ -27,9 +27,15 @@ addopts = [
     "--verbose",
     "--tb=short",
     "--strict-markers",
-    "--disable-warnings",
     "--cov=main",
     "--cov-report=term-missing"
+]
+filterwarnings = [
+    "ignore:.*PydanticSerializationUnexpectedValue.*:UserWarning",
+    "ignore:.*Pydantic serializer warnings.*:UserWarning",
+    "ignore::ResourceWarning",
+    "ignore::DeprecationWarning",
+    "ignore:.*unclosed.*:ResourceWarning"
 ]
 
 [tool.uv]
