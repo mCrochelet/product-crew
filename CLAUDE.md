@@ -38,6 +38,9 @@ uv run pytest --cov=main --cov-report=term-missing
 
 # Run tests quietly with coverage
 uv run pytest -q --cov=main --cov-report=term-missing
+
+# Run specific test file
+uv run pytest test/test_main.py
 ```
 
 ### Application Usage
@@ -86,10 +89,21 @@ The application is **fully implemented** according to the requirements in `requi
 - ✅ Robust error handling with proper exit codes (0=success, 1=error)
 - ✅ Environment variable loading from `.env.local`
 - ✅ Type-safe implementation with comprehensive validation
-- ✅ Comprehensive test suite with 24 test cases and 87% code coverage
+- ✅ Comprehensive test suite with 36 test cases and 90% code coverage
 - ✅ Pytest-based testing framework with coverage reporting
+- ✅ Organized test structure with dedicated test artifacts
 
 ## File Naming Conventions
 - Task files: `[number]_[task_name_in_snake_case].md`
 - Numbers less than 10 prefixed with 0 (01, 02, etc.)
 - New PID files when not overwriting: append `YYYY-MM-DD` format
+
+## Test Structure
+Tests are organized in the `test/` directory with the following structure:
+- `test/test_main.py` - Main test suite with 36 test cases
+- `test/artifacts/` - Test artifacts and sample files for assertions:
+  - `sample_pid.md` - Full-featured PID example for testing
+  - `minimal_pid.md` - Basic PID structure for simple tests
+  - `invalid_file.txt` - Non-markdown file for validation testing
+  - `sample_requirements/` - Sample requirements directory structure
+- Tests cover all functionality including demo mode, CLI validation, file operations, and error handling

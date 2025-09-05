@@ -114,10 +114,55 @@ def demo_pause(message: str, step: str = "") -> None:
         sys.exit(0)
 
 
+def demo_display_agent_info(agent: Agent) -> None:
+    """Display detailed agent information in demo mode."""
+    click.echo(f"\n{click.style('🤖 AGENT PROFILE', fg='magenta', bold=True)}")
+    click.echo(f"{click.style('═' * 50, fg='magenta')}")
+    click.echo(f"{click.style('Role:', fg='cyan', bold=True)} {click.style(agent.role, fg='white', bold=True)}")
+    click.echo(f"{click.style('Goal:', fg='cyan', bold=True)} {agent.goal}")
+    click.echo(f"{click.style('Backstory:', fg='cyan', bold=True)}")
+    # Split backstory into lines for better readability
+    backstory_lines = agent.backstory.split('. ')
+    for line in backstory_lines:
+        if line.strip():
+            click.echo(f"  • {line.strip()}{'.' if not line.strip().endswith('.') else ''}")
+    click.echo(f"{click.style('═' * 50, fg='magenta')}")
+
+
+def demo_display_task_info(task: Task, task_number: int = 1) -> None:
+    """Display detailed task information in demo mode."""
+    click.echo(f"\n{click.style(f'📋 TASK #{task_number}', fg='yellow', bold=True)}")
+    click.echo(f"{click.style('─' * 50, fg='yellow')}")
+    click.echo(f"{click.style('Description:', fg='cyan', bold=True)}")
+    # Split description into readable chunks
+    desc_lines = task.description.split('\n')
+    for line in desc_lines[:3]:  # Show first 3 lines
+        if line.strip():
+            click.echo(f"  {line.strip()}")
+    if len(desc_lines) > 3:
+        click.echo(f"  {click.style('... (description continues)', fg='bright_black')}")
+    
+    click.echo(f"\n{click.style('Expected Output:', fg='cyan', bold=True)}")
+    expected_lines = task.expected_output.split('\n')
+    for line in expected_lines[:3]:  # Show first 3 lines
+        if line.strip():
+            click.echo(f"  {line.strip()}")
+    if len(expected_lines) > 3:
+        click.echo(f"  {click.style('... (output continues)', fg='bright_black')}")
+    click.echo(f"{click.style('─' * 50, fg='yellow')}")
+
+
+def demo_section_separator(title: str) -> None:
+    """Display a visual section separator in demo mode."""
+    click.echo(f"\n{click.style('│', fg='bright_blue')} {click.style(title, fg='bright_white', bold=True)} {click.style('│', fg='bright_blue')}")
+    click.echo(f"{click.style('┌' + '─' * (len(title) + 4) + '┐', fg='bright_blue')}")
+
+
 def run_crew(requirements_path: Path, pid_path: Path, overwrite: bool, demo: bool = False) -> None:
     """Run CrewAI agent to process PID file and create output."""
     try:
         if demo:
+            demo_section_separator("INITIALIZATION")
             demo_pause("Starting product crew execution", "Step 1/5")
         
         # Load environment variables
@@ -127,7 +172,12 @@ def run_crew(requirements_path: Path, pid_path: Path, overwrite: bool, demo: boo
         output_path = get_output_file_path(pid_path, overwrite)
         
         if demo:
-            demo_pause(f"Output file determined: {output_path}", "Step 2/5")
+            click.echo(f"\n{click.style('🎯 EXECUTION PARAMETERS', fg='green', bold=True)}")
+            click.echo(f"{click.style('Requirements Path:', fg='cyan')} {requirements_path}")
+            click.echo(f"{click.style('Input PID File:', fg='cyan')} {pid_path}")
+            click.echo(f"{click.style('Output File:', fg='cyan')} {output_path}")
+            click.echo(f"{click.style('Overwrite Mode:', fg='cyan')} {overwrite}")
+            demo_pause("Configuration validated", "Step 2/5")
         
         # Read the original PID file content
         try:
@@ -149,6 +199,7 @@ def run_crew(requirements_path: Path, pid_path: Path, overwrite: bool, demo: boo
             return
 
         if demo:
+            demo_section_separator("AGENT & TASK CREATION")
             demo_pause("Creating CrewAI agents and tasks", "Step 3/5")
         
         # Create the agent and task for processing the PID content
@@ -156,7 +207,11 @@ def run_crew(requirements_path: Path, pid_path: Path, overwrite: bool, demo: boo
         task = create_print_paths_task(requirements_path, pid_path, overwrite)
 
         if demo:
-            demo_pause("Initializing crew with agents and tasks", "Step 4/5")
+            demo_display_agent_info(agent)
+            demo_pause("Agent profile created. Now creating task...", "Step 3/5 - Agent Ready")
+            
+            demo_display_task_info(task, 1)
+            demo_pause("Task specification ready. Initializing crew...", "Step 4/5")
         
         # Create and run the crew
         crew = Crew(
@@ -166,16 +221,23 @@ def run_crew(requirements_path: Path, pid_path: Path, overwrite: bool, demo: boo
         )
 
         if demo:
+            demo_section_separator("CREW EXECUTION")
             demo_pause("Executing crew tasks (this may take a moment)", "Step 5/5")
         
         # Run the crew (for now just processing, later will generate content)
         crew.kickoff()
+        
+        if demo:
+            demo_section_separator("OUTPUT GENERATION")
+            click.echo(f"\n{click.style('📝 FILE PROCESSING', fg='bright_green', bold=True)}")
+            click.echo(f"{click.style('Creating output file:', fg='cyan')} {output_path}")
         
         # For now, create the output file with original content
         # In future tasks, this will be enhanced with agent-generated content
         create_pid_file(output_path, original_content)
 
         if demo:
+            click.echo(f"{click.style('✅ File successfully created!', fg='bright_green', bold=True)}")
             demo_pause("Crew execution completed successfully!", "Completion")
 
         # Print the expected output format
@@ -185,7 +247,11 @@ def run_crew(requirements_path: Path, pid_path: Path, overwrite: bool, demo: boo
 
     except Exception as e:
         if demo:
-            demo_pause(f"Error occurred: {e}. Falling back to direct output.", "Error Handling")
+            demo_section_separator("ERROR HANDLING")
+            click.echo(f"\n{click.style('❌ ERROR ENCOUNTERED', fg='red', bold=True)}")
+            click.echo(f"{click.style('Error Details:', fg='red')} {str(e)}")
+            click.echo(f"{click.style('Fallback:', fg='yellow')} Using direct output mode")
+            demo_pause("Error handled. Continuing with fallback...", "Error Recovery")
         click.echo(f"CrewAI execution error: {e}", err=True)
         # Fallback to direct printing on any error
         print(str(requirements_path))
