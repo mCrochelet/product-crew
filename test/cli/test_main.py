@@ -35,7 +35,7 @@ class TestCLIIntegration:
         assert "--demo" in result.output
         assert "Enable interactive demo mode" in result.output
         assert "--model" in result.output
-        assert "OpenAI model to use for agents" in result.output
+        assert "Model to use for agents (default: gpt-4o)" in result.output
     
     def test_cli_validation_failure_nonexistent_requirements(self):
         """Test CLI exit code for non-existent requirements path."""

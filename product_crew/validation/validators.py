@@ -23,30 +23,11 @@ def validate_pid_path(pid_path: str) -> Path:
 
 
 def validate_model(model: str) -> str:
-    """Validate that the model is a supported OpenAI model."""
-    # List of valid OpenAI models
-    valid_models = {
-        'gpt-4',
-        'gpt-4-turbo',
-        'gpt-4-turbo-preview', 
-        'gpt-4-0125-preview',
-        'gpt-4-1106-preview',
-        'gpt-3.5-turbo',
-        'gpt-3.5-turbo-16k',
-        'gpt-3.5-turbo-1106',
-        'gpt-3.5-turbo-0125',
-    }
+    """Validate that the model is provided (CrewAI will handle actual model validation)."""
+    if not model or not model.strip():
+        raise ValueError("Model name cannot be empty")
     
-    # Case-insensitive comparison
-    model_lower = model.lower()
-    valid_models_lower = {m.lower() for m in valid_models}
-    
-    if model_lower not in valid_models_lower:
-        supported_models = ', '.join(sorted(valid_models))
-        raise ValueError(f"Invalid model '{model}'. Supported models: {supported_models}")
-    
-    # Return the original case model name
-    return model
+    return model.strip()
 
 
 def validate_openai_api_key() -> str:
@@ -55,3 +36,16 @@ def validate_openai_api_key() -> str:
     if not api_key:
         raise ValueError("OpenAI API key not found. Please set OPENAI_API_KEY environment variable.")
     return api_key
+
+
+def validate_api_key_for_model(model: str) -> str:
+    """Validate that the appropriate API key is available for the selected model."""
+    if model.lower().startswith('claude-'):
+        # Anthropic model - validate Anthropic API key
+        api_key = os.getenv("ANTHROPIC_API_KEY")
+        if not api_key:
+            raise ValueError("Anthropic API key not found. Please set ANTHROPIC_API_KEY environment variable.")
+        return api_key
+    else:
+        # Assume OpenAI for non-Claude models - validate OpenAI API key
+        return validate_openai_api_key()

@@ -13,6 +13,11 @@ def load_environment() -> None:
     env_file = Path(".env.local")
     if env_file.exists():
         load_dotenv(env_file)
+    else :
+        env_file = Path(".env")
+        if env_file.exists():
+            load_dotenv(env_file)
+
 
 
 def get_output_file_path(original_path: Path, overwrite: bool) -> Path:

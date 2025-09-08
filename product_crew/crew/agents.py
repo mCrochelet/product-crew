@@ -4,10 +4,21 @@ import os
 from crewai import Agent
 
 
-def create_path_printer_agent(model: str = 'gpt-4') -> Agent:
+def _is_anthropic_model(model: str) -> bool:
+    """Check if the model is an Anthropic model."""
+    return model.lower().startswith('claude-')
+
+
+def create_path_printer_agent(model: str = 'gpt-4o') -> Agent:
     """Create a CrewAI agent that prints file paths."""
+    
     # Set the model via environment variable for CrewAI
-    os.environ['OPENAI_MODEL_NAME'] = model
+    if _is_anthropic_model(model):
+        os.environ['MODEL'] = model
+    else:
+        # For OpenAI models, use the legacy environment variable for backwards compatibility
+        os.environ['OPENAI_MODEL_NAME'] = model
+        os.environ['MODEL'] = model
     
     return Agent(
         role='Path Printer',

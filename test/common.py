@@ -15,7 +15,7 @@ from io import StringIO
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import from new modular structure
-from product_crew.validation import validate_requirements_path, validate_pid_path, validate_model, validate_openai_api_key
+from product_crew.validation import validate_requirements_path, validate_pid_path, validate_model, validate_openai_api_key, validate_api_key_for_model
 from product_crew.file_operations import create_pid_file, get_output_file_path, load_environment
 from product_crew.crew import create_path_printer_agent, create_print_paths_task, run_crew
 from product_crew.demo import demo_display_agent_info, demo_display_task_info, demo_section_separator
@@ -29,6 +29,7 @@ class MockMain:
         self.validate_pid_path = validate_pid_path
         self.validate_model = validate_model
         self.validate_openai_api_key = validate_openai_api_key
+        self.validate_api_key_for_model = validate_api_key_for_model
         
         # File operations
         self.create_pid_file = create_pid_file

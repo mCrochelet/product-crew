@@ -76,6 +76,9 @@ The `requirements/` directory contains project specifications:
 - Initiative files: either direct children of requirements/ or same name as parent folder
 - Task files: numbered sequentially (01_task_name.md, 02_task_name.md, etc.)
 - Each subfolder should contain one main file matching the folder name
+- If a requirement is a direct child of requirements/, always create a new 
+  folder of the same name, move it in it, and create the task files to plan 
+  the implementation before starting the work.
 
 ### Product Initiative Document Template
 The README.md contains a comprehensive PID template with sections for:
