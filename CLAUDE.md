@@ -25,7 +25,7 @@ uv sync
 uv sync --extra test
 
 # Run the application
-uv run product-crew -r <requirements_path> --pid <pid_path> [--overwrite]
+uv run product-crew -r <requirements_path> --pid <pid_path> [--overwrite] [--demo] [--model <model_name>]
 
 # Run tests (quiet mode, suppresses CrewAI/Pydantic warnings)
 uv run pytest -q
@@ -44,18 +44,31 @@ uv run pytest test/test_main.py
 ```
 
 ### Application Usage
-The CLI accepts three arguments:
+The CLI accepts these arguments:
 - `-r, --requirements`: Path to project requirements folder (required)
 - `--pid`: Path to product initiative document to refine (required) 
 - `--overwrite`: Flag to overwrite existing PID file, otherwise creates new timestamped file (optional)
+- `--demo`: Enable interactive demo mode (optional)
+- `--model`: OpenAI model to use for agents (optional, default: gpt-4)
 
 ## Architecture and Code Structure
 
-### Core Application (`main.py`)
-- Click-based CLI with argument validation
-- Validates requirements path exists and PID path is a valid markdown file
-- Currently prints validated absolute paths (skeleton implementation)
-- Uses Python 3.13 with dependencies: CrewAI (>=0.28.0) and Click (>=8.0.0)
+The application follows a modular architecture with clear separation of concerns:
+
+### Package Structure
+- `product_crew/` - Main package with modular organization
+- `main.py` - Simple entry point wrapper
+
+### Modules
+- **`cli/`** - Command-line interface and argument parsing
+- **`validation/`** - Input validation for CLI arguments 
+- **`file_operations/`** - File handling and environment management
+- **`crew/`** - CrewAI agent management (agents, tasks, execution)
+- **`demo/`** - Demo mode utilities and visualization
+
+### Entry Point (`main.py`)
+- Simple wrapper that imports and calls the CLI module
+- Maintains backwards compatibility for package installation
 
 ### Requirements Structure
 The `requirements/` directory contains project specifications:
@@ -89,9 +102,10 @@ The application is **fully implemented** according to the requirements in `requi
 - ✅ Robust error handling with proper exit codes (0=success, 1=error)
 - ✅ Environment variable loading from `.env.local`
 - ✅ Type-safe implementation with comprehensive validation
-- ✅ Comprehensive test suite with 36 test cases and 90% code coverage
+- ✅ Comprehensive test suite with 46 test cases and 91% code coverage
 - ✅ Pytest-based testing framework with coverage reporting
 - ✅ Organized test structure with dedicated test artifacts
+- ✅ OpenAI model selection with validation and CrewAI integration
 
 ## File Naming Conventions
 - Task files: `[number]_[task_name_in_snake_case].md`
@@ -100,10 +114,10 @@ The application is **fully implemented** according to the requirements in `requi
 
 ## Test Structure
 Tests are organized in the `test/` directory with the following structure:
-- `test/test_main.py` - Main test suite with 36 test cases
+- `test/test_main.py` - Main test suite with 46 test cases
 - `test/artifacts/` - Test artifacts and sample files for assertions:
   - `sample_pid.md` - Full-featured PID example for testing
   - `minimal_pid.md` - Basic PID structure for simple tests
   - `invalid_file.txt` - Non-markdown file for validation testing
   - `sample_requirements/` - Sample requirements directory structure
-- Tests cover all functionality including demo mode, CLI validation, file operations, and error handling
+- Tests cover all functionality including demo mode, model selection, CLI validation, file operations, and error handling

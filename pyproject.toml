@@ -9,6 +9,9 @@ dependencies = [
     "python-dotenv>=1.0.0",
 ]
 
+[tool.setuptools]
+packages = ["product_crew", "product_crew.cli", "product_crew.validation", "product_crew.file_operations", "product_crew.crew", "product_crew.demo"]
+
 [project.optional-dependencies]
 test = [
     "pytest>=7.0.0",
@@ -16,10 +19,10 @@ test = [
 ]
 
 [project.scripts]
-product-crew = "main:cli"
+product-crew = "product_crew.cli.main:cli"
 
 [tool.pytest.ini_options]
-testpaths = ["."]
+testpaths = ["test"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
 python_classes = ["Test*"]
@@ -27,7 +30,7 @@ addopts = [
     "--verbose",
     "--tb=short",
     "--strict-markers",
-    "--cov=main",
+    "--cov=product_crew",
     "--cov-report=term-missing"
 ]
 filterwarnings = [
