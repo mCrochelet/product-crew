@@ -1,29 +1,12 @@
-"""CrewAI task creation and definition - lifecycle-based workflow."""
+"""Problem understanding analysis task."""
 
 from pathlib import Path
 from crewai import Task
-from typing import List
-
-# Import lifecycle system
-from .lifecycle import LifecycleContext, ProductLifecycleController
-
-# Import legacy orchestration task from Product Manager for backward compatibility
-from .agents.product_manager.tasks import create_product_manager_orchestration_task
-
-# Import all agents for delegation workflow
-from .agents import (
-    create_product_manager_agent,
-    create_market_analyst_agent,
-    create_engineering_manager_agent,
-    create_product_designer_agent,
-    create_functional_analyst_agent,
-    create_scrum_master_agent,
-    create_path_printer_agent  # Legacy compatibility
-)
+from .agents import create_product_manager_agent
 
 
-def create_lifecycle_workflow_task(requirements_path: Path, pid_path: Path, model: str = 'gpt-4o') -> Task:
-    """Create lifecycle-based task using the 7-phase product refinement approach."""
+def create_problem_understanding_analysis_task(requirements_path: Path, pid_path: Path, overwrite: bool, model: str = 'gpt-4o') -> Task:
+    """Create a task that analyzes problem understanding in the PID."""
     
     # Read PID content
     try:
@@ -33,129 +16,125 @@ def create_lifecycle_workflow_task(requirements_path: Path, pid_path: Path, mode
     
     return Task(
         description=f"""
-        Execute the comprehensive 7-phase product refinement lifecycle for creating a high-quality Product Initiative Document.
+        Analyze the problem understanding in this Product Initiative Document and assess how well the problem space is defined.
         
         **Current PID Content:**
         {pid_content}
         
-        **Requirements Folder:** {requirements_path}
+        **Requirements Path:** {requirements_path}
         
-        **7-Phase Lifecycle Approach:**
+        **Analysis Framework:**
+        Evaluate the problem understanding across these six critical dimensions:
         
-        1. **Understand Problem**: Analyze existing data and determine research needs
-        2. **Define Problem**: Create clear problem statement and domain definition
-        3. **Ideate Solutions**: Generate multiple solution alternatives with all specialists
-        4. **Validate Solutions**: Evaluate solutions across Value, Viability, Feasibility, Usability
-        5. **Refine Solutions**: Improve top candidates based on validation feedback
-        6. **Select Best Solution**: Make informed selection decision with clear rationale
-        7. **Plan Implementation**: Create comprehensive implementation roadmap and tasks
+        1. **User and Customer Identification**
+           - Is there a clear understanding of who the user is?
+           - Is there a clear understanding of who the customer is?
+           - Are user and customer distinguished (if they are different people)?
+           - Are user personas, characteristics, or segments defined?
         
-        **Your Role**: As Product Manager, orchestrate this structured approach by:
-        - Leading each phase with appropriate specialist delegation
-        - Making conditional delegation decisions based on data quality and needs
-        - Synthesizing insights from all specialists into coherent recommendations
-        - Ensuring quality gates are met before phase transitions
-        - Creating a comprehensive, actionable Product Initiative Document
+        2. **Job-to-be-Done Understanding**
+           - Is the user's job-to-be-done clearly articulated?
+           - Is it clear what progress users are trying to make?
+           - Are functional, emotional, and social job dimensions considered?
+           - Are job triggers and context understood?
         
-        This structured approach ensures thorough analysis, stakeholder alignment, and implementation readiness.
+        3. **Value Proposition Clarity**
+           - Is the value for the customer clearly defined?
+           - Are financial benefits identified and quantified?
+           - Are time savings or other benefits articulated?
+           - Is the value proposition differentiated from generic benefits?
+        
+        4. **Competitive Landscape Analysis**
+           - How do users currently solve this job-to-be-done?
+           - What existing solutions, tools, or workarounds are being used?
+           - How satisfied are users with current solutions?
+           - What are the gaps in existing competitive offerings?
+        
+        5. **Success Metrics Definition**
+           - Are success metrics for job completion clearly defined?
+           - Are both leading and lagging indicators identified?
+           - Are baseline measurements established or planned?
+           - Are metrics tied to user progress and value creation?
+        
+        6. **Service Blueprint Context**
+           - How does this problem fit within the broader service ecosystem?
+           - What touchpoints and stakeholder interactions are involved?
+           - How does this problem influence or get influenced by other parts of the service?
+           - Are ecosystem dependencies and relationships understood?
+        
+        **Critical Instructions:**
+        - Focus ONLY on problem understanding - do not suggest any solutions
+        - Assess what is well understood vs. what has gaps or assumptions
+        - Identify areas where the problem analysis is strong vs. weak
+        - Point out missing elements in the problem understanding
+        - Do not propose fixes, just assess the current state of understanding
         """,
         expected_output="""
-        A comprehensive Product Initiative Document created through the 7-phase lifecycle containing:
+        ## Problem Understanding Assessment
         
-        ## Executive Summary
-        - Key findings and strategic recommendations
-        - Selected solution and rationale
-        - Implementation readiness assessment
+        ### Overall Assessment
+        - **Problem Understanding Score**: [X/10] with brief rationale
+        - **Readiness for Solution Development**: [Ready/Not Ready] with justification
         
-        ## Problem Space (Phases 1-2)
-        - Thorough problem understanding and context analysis
-        - Clear problem statement and domain definition
-        - Stakeholder impact analysis
+        ### Detailed Analysis by Dimension
         
-        ## Solution Space (Phases 3-6)
-        - Multiple solution alternatives explored
-        - Comprehensive evaluation across 4 dimensions (Value/Viability/Feasibility/Usability)
-        - Solution refinement based on validation feedback
-        - Clear selection decision with detailed rationale
+        #### 1. User and Customer Identification
+        **Status**: [Well Defined / Partially Defined / Not Defined / Unclear]
+        **Findings**:
+        - What is clearly understood about users/customers
+        - What is missing or assumed
+        - Key gaps in user/customer understanding
         
-        ## Implementation Planning (Phase 7)
-        - Detailed implementation roadmap and timeline
-        - Resource requirements and team planning
-        - Risk assessment and mitigation strategies
-        - Success metrics and measurement plan
+        #### 2. Job-to-be-Done Understanding  
+        **Status**: [Well Defined / Partially Defined / Not Defined / Unclear]
+        **Findings**:
+        - What is clearly understood about the job-to-be-done
+        - What is missing or assumed about user progress/goals
+        - Key gaps in job understanding
         
-        ## Lifecycle Quality Metrics
-        - Problem clarity progression
-        - Solution evaluation completeness
-        - Decision rationale documentation
-        - Implementation readiness validation
+        #### 3. Value Proposition Clarity
+        **Status**: [Well Defined / Partially Defined / Not Defined / Unclear] 
+        **Findings**:
+        - What value is clearly articulated
+        - What value claims are missing or vague
+        - Key gaps in value understanding
         
-        The final PID represents a thoroughly analyzed, well-validated, and implementation-ready product initiative.
+        #### 4. Competitive Landscape Analysis
+        **Status**: [Well Defined / Partially Defined / Not Defined / Unclear]
+        **Findings**:
+        - What is understood about current solutions
+        - What competitive analysis is missing
+        - Key gaps in landscape understanding
+        
+        #### 5. Success Metrics Definition
+        **Status**: [Well Defined / Partially Defined / Not Defined / Unclear]
+        **Findings**:
+        - What metrics are clearly defined
+        - What measurement approaches are missing
+        - Key gaps in success definition
+        
+        #### 6. Service Blueprint Context
+        **Status**: [Well Defined / Partially Defined / Not Defined / Unclear]
+        **Findings**:
+        - What ecosystem context is understood
+        - What service relationships are missing
+        - Key gaps in context understanding
+        
+        ### Priority Gaps for Problem Understanding
+        1. **[Gap 1]**: Brief description of most critical gap
+        2. **[Gap 2]**: Brief description of second most critical gap  
+        3. **[Gap 3]**: Brief description of third most critical gap
+        
+        ### Strengths in Current Problem Understanding
+        - List the strongest aspects of current problem analysis
+        - Highlight what is well-researched or clearly articulated
+        
+        ### Next Steps for Problem Understanding
+        - What specific areas need more research/analysis
+        - What assumptions need validation
+        - What stakeholder input is needed
+        
+        **Note**: This assessment focuses purely on problem understanding quality and does not suggest any solutions.
         """,
         agent=create_product_manager_agent(model)
-    )
-
-
-def create_delegation_workflow_task(requirements_path: Path, pid_path: Path, model: str = 'gpt-4o') -> Task:
-    """Legacy function - Create a single delegation-based task (now redirects to lifecycle)."""
-    
-    return create_lifecycle_workflow_task(requirements_path, pid_path, model)
-
-
-def create_delegation_crew_agents(model: str = 'gpt-4o') -> List:
-    """Create all agents needed for the delegation workflow."""
-    
-    return [
-        create_product_manager_agent(model),  # The orchestrator
-        create_market_analyst_agent(model),
-        create_engineering_manager_agent(model),
-        create_product_designer_agent(model),
-        create_functional_analyst_agent(model),
-        create_scrum_master_agent(model)
-    ]
-
-
-# Legacy functions for backwards compatibility
-def create_discovery_phase_tasks(requirements_path: Path, pid_path: Path, model: str = 'gpt-4o') -> List[Task]:
-    """Legacy function - now uses delegation workflow."""
-    return [create_delegation_workflow_task(requirements_path, pid_path, model)]
-
-
-def create_solution_design_phase_tasks(discovery_results: str, model: str = 'gpt-4o') -> List[Task]:
-    """Legacy function - now returns empty list as delegation handles all phases."""
-    return []
-
-
-def create_breakdown_phase_tasks(solution_results: str, model: str = 'gpt-4o') -> List[Task]:
-    """Legacy function - now returns empty list as delegation handles all phases."""
-    return []
-
-
-def create_integration_task(all_results: str, requirements_path: Path, pid_path: Path, model: str = 'gpt-4o') -> Task:
-    """Legacy function - now returns a simple pass-through task."""
-    return Task(
-        description="Integration already handled by delegation workflow. Pass through results.",
-        expected_output="Results from delegation workflow",
-        agent=create_product_manager_agent(model)
-    )
-
-
-# Legacy function for backwards compatibility
-def create_print_paths_task(requirements_path: Path, pid_path: Path, overwrite: bool, model: str = 'gpt-4') -> Task:
-    """Legacy function - creates a simple path printing task for backwards compatibility."""
-    return Task(
-        description=(
-            f"Print exactly these three values as separate lines:\n"
-            f"1. {requirements_path}\n"
-            f"2. {pid_path}\n"
-            f"3. {overwrite}\n\n"
-            f"Output only these values, nothing else. No explanations, no formatting."
-        ),
-        expected_output=(
-            f"Three lines containing:\n"
-            f"Line 1: {requirements_path}\n"
-            f"Line 2: {pid_path}\n"
-            f"Line 3: {overwrite}"
-        ),
-        agent=create_path_printer_agent(model)
     )

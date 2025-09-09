@@ -1,25 +1,11 @@
-"""CrewAI management module."""
+"""Product Manager crew module."""
 
-from .agents import (
-    create_product_manager_agent,
-    create_engineering_manager_agent, 
-    create_product_designer_agent,
-    create_functional_analyst_agent,
-    create_scrum_master_agent,
-    create_market_analyst_agent,
-    create_path_printer_agent  # Legacy compatibility
-)
-from .tasks import create_print_paths_task
 from .runner import run_crew
+from .agents import create_product_manager_agent
+from .tasks import create_problem_understanding_analysis_task
 
 __all__ = [
+    'run_crew',
     'create_product_manager_agent',
-    'create_engineering_manager_agent',
-    'create_product_designer_agent', 
-    'create_functional_analyst_agent',
-    'create_scrum_master_agent',
-    'create_market_analyst_agent',
-    'create_path_printer_agent',  # Legacy compatibility
-    'create_print_paths_task',
-    'run_crew'
+    'create_problem_understanding_analysis_task'
 ]
