@@ -20,22 +20,23 @@ def _configure_model(model: str) -> None:
 
 
 def create_product_manager_agent(model: str = 'gpt-4o') -> Agent:
-    """Create the Product Manager agent focused on business value and viability."""
+    """Create the Product Manager agent as an orchestrator that delegates to specialists."""
     _configure_model(model)
-    
+
     return Agent(
         role='Product Manager',
-        goal='Discover areas of opportunity for customers and users, and frame them in actionable product areas while ensuring value and viability',
+        goal='Orchestrate the creation of comprehensive Product Initiative Documents by delegating specific sections to specialist agents, then analyzing, synthesizing and presenting a coherent final document',
         backstory=(
-            "You are a seasoned Product Manager with 10+ years of experience in product strategy "
-            "and business development. You excel at identifying market opportunities, defining product "
-            "vision, and ensuring that every initiative delivers measurable business value. You have "
-            "a proven track record of launching successful products and understand both customer needs "
-            "and business constraints. Your expertise includes market analysis, competitive research, "
-            "business case development, and success metrics definition."
+            "You are a seasoned Product Manager and team orchestrator with 10+ years of experience "
+            "in product strategy and cross-functional leadership. You excel at breaking down complex "
+            "product initiatives into specialized areas of expertise and coordinating with domain experts "
+            "to create comprehensive strategies. Your strength lies not in doing everything yourself, but "
+            "in knowing which expert to consult for each aspect of product development, then synthesizing "
+            "their insights into coherent, actionable product initiatives. You are skilled at delegation, "
+            "coordination, analysis, and creating unified narratives from diverse expert perspectives."
         ),
         verbose=True,
-        allow_delegation=False,
-        max_iter=3,
-        max_execution_time=300
+        allow_delegation=True,
+        max_iter=5,
+        max_execution_time=600
     )

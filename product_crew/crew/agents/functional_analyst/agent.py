@@ -25,14 +25,15 @@ def create_functional_analyst_agent(model: str = 'gpt-4o') -> Agent:
     
     return Agent(
         role='Functional Analyst',
-        goal='Break down solutions into clear, actionable functional increments and detailed requirements',
+        goal='Provide detailed requirements analysis, user story creation, and functional specifications when delegated requirements-related aspects of product initiatives',
         backstory=(
             "You are a meticulous Functional Analyst with 7+ years of experience in business analysis "
-            "and requirements engineering. You excel at decomposing complex problems into manageable "
-            "functional components and translating business needs into clear technical requirements. "
-            "Your expertise includes requirements elicitation, user story writing, acceptance criteria "
-            "definition, and dependency mapping. You have a keen eye for detail and ensure that "
-            "nothing falls through the cracks in the requirements process."
+            "and requirements engineering. You excel at responding to requirements analysis requests "
+            "from Product Managers and breaking down complex product concepts into detailed functional "
+            "specifications. Your expertise includes requirements decomposition, user story writing, "
+            "acceptance criteria definition, and dependency mapping. You are particularly effective at "
+            "translating high-level product concepts into implementable requirements when delegated "
+            "specific analysis and documentation tasks."
         ),
         verbose=True,
         allow_delegation=False,

@@ -11,12 +11,16 @@ from crewai import Crew
 from ..file_operations import load_environment, get_output_file_path, create_pid_file
 from ..demo import demo_pause, demo_display_agent_info, demo_display_task_info, demo_section_separator
 from .tasks import (
-    create_discovery_phase_tasks,
-    create_solution_design_phase_tasks, 
-    create_breakdown_phase_tasks,
-    create_integration_task,
+    create_lifecycle_workflow_task,
+    create_delegation_workflow_task,
+    create_delegation_crew_agents,
+    create_discovery_phase_tasks,  # Legacy compatibility
+    create_solution_design_phase_tasks,  # Legacy compatibility
+    create_breakdown_phase_tasks,  # Legacy compatibility
+    create_integration_task,  # Legacy compatibility
     create_print_paths_task  # Legacy compatibility
 )
+from .lifecycle import LifecycleContext, ProductLifecycleController
 from .agents import create_path_printer_agent  # Legacy compatibility
 
 
@@ -56,6 +60,75 @@ def check_consensus(results: List[str], threshold: float = 0.6) -> bool:
     consistency = sum(1 for l in lengths if abs(l - avg_length) / avg_length < 0.5) / len(lengths)
     
     return consistency >= threshold
+
+
+def run_lifecycle_workflow(requirements_path: Path, pid_path: Path, overwrite: bool, 
+                          demo: bool = False, model: str = 'gpt-4o') -> str:
+    """Run the 7-phase product refinement lifecycle workflow."""
+    load_environment()
+    
+    # Read PID content
+    try:
+        pid_content = pid_path.read_text(encoding='utf-8')
+    except Exception:
+        pid_content = "# Product Initiative Document\n\n*No existing content found*"
+    
+    # Create lifecycle context
+    context = LifecycleContext(
+        requirements_path=requirements_path,
+        pid_path=pid_path,
+        original_pid_content=pid_content,
+        model=model
+    )
+    
+    # Create and run lifecycle controller
+    controller = ProductLifecycleController(context, demo=demo)
+    return controller.execute_lifecycle()
+
+
+def run_delegation_workflow(requirements_path: Path, pid_path: Path, overwrite: bool, 
+                           demo: bool = False, model: str = 'gpt-4o') -> str:
+    """Run the delegation-based workflow where Product Manager orchestrates all other agents."""
+    load_environment()
+    
+    if demo:
+        demo_section_separator("PRODUCT CREW DELEGATION WORKFLOW")
+        click.echo(f"{click.style('🎯 Starting Delegation-Based Product Crew Analysis', fg='bright_green', bold=True)}")
+        click.echo(f"{click.style('Orchestrator:', fg='cyan')} Product Manager")
+        click.echo(f"{click.style('Specialists:', fg='cyan')} Market Analyst, Engineering Manager, Product Designer, Functional Analyst, Scrum Master")
+        demo_pause("Delegation workflow initialized", "Starting delegation orchestration")
+    
+    # Create the delegation task and all agents
+    delegation_task = create_delegation_workflow_task(requirements_path, pid_path, model)
+    all_agents = create_delegation_crew_agents(model)
+    
+    if demo:
+        demo_section_separator("DELEGATION ORCHESTRATION")
+        click.echo(f"\n{click.style('🎭 DELEGATION WORKFLOW', fg='yellow', bold=True)}")
+        click.echo(f"{click.style('Product Manager will delegate to:', fg='cyan')}")
+        for agent in all_agents[1:]:  # Skip the Product Manager (first agent)
+            click.echo(f"  • {agent.role}")
+        demo_pause("All agents ready for delegation", "Starting orchestrated execution")
+    
+    # Create and run the crew with delegation
+    delegation_crew = Crew(
+        agents=all_agents,
+        tasks=[delegation_task],
+        verbose=demo
+    )
+    
+    delegation_start = time.time()
+    delegation_results = delegation_crew.kickoff()
+    delegation_time = time.time() - delegation_start
+    
+    if demo:
+        demo_section_separator("DELEGATION COMPLETION")
+        click.echo(f"{click.style('✅ Delegation Workflow Complete!', fg='bright_green', bold=True)}")
+        click.echo(f"{click.style('Execution Time:', fg='cyan')} {delegation_time:.1f}s")
+        click.echo(f"{click.style('Orchestrator:', fg='cyan')} Product Manager successfully coordinated all specialists")
+        demo_pause("Comprehensive PID created through delegation", "Workflow completion")
+    
+    return str(delegation_results)
 
 
 def run_collaborative_workflow(requirements_path: Path, pid_path: Path, overwrite: bool, 
@@ -219,8 +292,8 @@ def run_crew(requirements_path: Path, pid_path: Path, overwrite: bool, demo: boo
             click.echo(f"{click.style('Model:', fg='cyan')} {model}")
             demo_pause("Configuration validated", "Starting collaborative workflow")
         
-        # Run the collaborative workflow
-        enhanced_content = run_collaborative_workflow(requirements_path, pid_path, overwrite, demo, model)
+        # Run the 7-phase lifecycle workflow
+        enhanced_content = run_lifecycle_workflow(requirements_path, pid_path, overwrite, demo, model)
         
         if demo:
             demo_section_separator("OUTPUT GENERATION")

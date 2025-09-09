@@ -1,13 +1,12 @@
-"""Product Manager tasks."""
+"""Product Manager tasks focused on delegation and orchestration."""
 
 from pathlib import Path
 from crewai import Task
 from .agent import create_product_manager_agent
-from ...tools import *
 
 
-def create_product_manager_discovery_task(requirements_path: Path, pid_path: Path, model: str = 'gpt-4o') -> Task:
-    """Create Product Manager discovery phase task for market opportunity analysis."""
+def create_product_manager_orchestration_task(requirements_path: Path, pid_path: Path, model: str = 'gpt-4o') -> Task:
+    """Create Product Manager orchestration task that delegates PID sections to specialists."""
     
     # Read the current PID content
     try:
@@ -17,60 +16,84 @@ def create_product_manager_discovery_task(requirements_path: Path, pid_path: Pat
     
     return Task(
         description=f"""
-        Analyze the market opportunity for the product initiative described in the PID file.
+        Orchestrate the creation of a comprehensive Product Initiative Document by delegating specific sections to specialist agents.
         
         Current PID Content:
         {pid_content}
         
         Requirements Folder: {requirements_path}
         
-        Your task:
-        1. Review the initiative description and extract key product concepts
-        2. Use the market_opportunity_analysis tool to assess market size and potential
-        3. Create a preliminary business case using business_case_evaluation
-        4. Define the value proposition using value_proposition_assessment
-        5. Provide strategic recommendations for the initiative
+        Your delegation strategy:
         
-        Focus on business value, market opportunity, and strategic alignment.
+        1. **Market Research & Analysis** - Delegate to Market Analyst:
+           - Ask the Market Analyst to conduct comprehensive market research
+           - Request competitive landscape analysis
+           - Get market sizing and opportunity assessment
+           - Obtain customer segmentation insights
+        
+        2. **Technical Feasibility & Architecture** - Delegate to Engineering Manager:
+           - Ask the Engineering Manager to assess technical feasibility
+           - Request system architecture recommendations
+           - Get development cost estimates and timeline projections
+           - Obtain technology stack recommendations
+        
+        3. **User Experience & Design Strategy** - Delegate to Product Designer:
+           - Ask the Product Designer to create user journey maps
+           - Request wireframe concepts and design system requirements
+           - Get usability assessment and design principles
+           - Obtain interface planning and user experience strategy
+        
+        4. **Requirements & User Stories** - Delegate to Functional Analyst:
+           - Ask the Functional Analyst to break down requirements
+           - Request detailed user stories with acceptance criteria
+           - Get dependency mapping and traceability matrix
+           - Obtain testing requirements and implementation sequence
+        
+        5. **Delivery Planning & Sprint Organization** - Delegate to Scrum Master:
+           - Ask the Scrum Master to create sprint breakdown
+           - Request effort estimation and velocity projections
+           - Get risk assessment and mitigation strategies
+           - Obtain delivery timeline and process improvements
+        
+        After receiving all delegated work, synthesize the insights into a coherent, comprehensive PID.
         """,
         expected_output="""
-        Market opportunity analysis with:
-        - Market size assessment and growth potential
-        - Business case evaluation with financial projections
-        - Value proposition definition for target customers
-        - Strategic recommendations and next steps
+        A comprehensive Product Initiative Document containing:
+        
+        ## Executive Summary
+        - Key findings synthesis from all specialist areas
+        - Strategic recommendations and value proposition
+        - High-level implementation roadmap
+        
+        ## Market Analysis 
+        - Market research findings and competitive landscape
+        - Customer segmentation and market opportunity
+        - Data gaps and research recommendations
+        
+        ## Technical Strategy  
+        - Technical feasibility assessment and architecture
+        - Technology recommendations and cost estimates
+        - Implementation timeline and technical risks
+        
+        ## User Experience Strategy
+        - User journey maps and design principles
+        - Interface concepts and design system requirements
+        - Usability guidelines and user experience strategy
+        
+        ## Requirements & Implementation 
+        - Detailed functional requirements and user stories
+        - Acceptance criteria and dependency mapping
+        - Testing strategy and traceability matrix
+        
+        ## Delivery Plan
+        - Sprint breakdown and effort estimates
+        - Delivery timeline and risk mitigation
+        - Process recommendations and success metrics
+        
+        ## Integrated Recommendations
+        - Coherent action plan combining all perspectives
+        - Risk assessment across all dimensions  
+        - Success metrics and next steps
         """,
         agent=create_product_manager_agent(model)
-    )
-
-
-def create_product_manager_integration_task(all_results: str, requirements_path: Path, pid_path: Path, model: str = 'gpt-4o') -> Task:
-    """Create Product Manager integration task to combine all agent outputs."""
-    
-    return Task(
-        description=f"""
-        Integrate all agent contributions into a comprehensive Product Initiative Document.
-        
-        All Phase Results:
-        {all_results}
-        
-        Your task:
-        1. Review all agent contributions for consistency and completeness
-        2. Identify any gaps or conflicts in the analysis
-        3. Synthesize insights into coherent recommendations
-        4. Create executive summary highlighting key findings
-        5. Provide final recommendations and next steps
-        
-        Focus on creating a complete, actionable PID that incorporates all perspectives.
-        """,
-        expected_output="""
-        Final integrated analysis including:
-        - Executive summary of key findings and recommendations
-        - Consolidated business case and market analysis
-        - Integrated technical and design strategy
-        - Complete implementation roadmap with realistic timelines
-        - Risk assessment and mitigation strategies across all dimensions
-        """,
-        agent=create_product_manager_agent(model),
-        context_str=f"Requirements: {requirements_path}, PID: {pid_path}"
     )
