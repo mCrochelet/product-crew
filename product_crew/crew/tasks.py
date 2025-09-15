@@ -2,7 +2,7 @@
 
 from pathlib import Path
 from crewai import Task
-from .agents import create_product_manager_agent
+from .agents import create_product_manager_agent, create_jobs_to_be_done_expert_agent
 
 
 def create_problem_understanding_analysis_task(requirements_path: Path, pid_path: Path, overwrite: bool, model: str = 'gpt-4o') -> Task:
@@ -68,6 +68,8 @@ def create_problem_understanding_analysis_task(requirements_path: Path, pid_path
         - Identify areas where the problem analysis is strong vs. weak
         - Point out missing elements in the problem understanding
         - Do not propose fixes, just assess the current state of understanding
+        - For Jobs-to-be-Done analysis, delegate to the Jobs-to-be-Done Expert agent
+        - Coordinate and synthesize insights from delegated assessments
         """,
         expected_output="""
         ## Problem Understanding Assessment
@@ -137,4 +139,122 @@ def create_problem_understanding_analysis_task(requirements_path: Path, pid_path
         **Note**: This assessment focuses purely on problem understanding quality and does not suggest any solutions.
         """,
         agent=create_product_manager_agent(model)
+    )
+
+
+def create_jobs_to_be_done_assessment_task(pid_content: str, model: str = 'gpt-4o') -> Task:
+    """Create a task specifically for Jobs-to-be-Done analysis of the PID."""
+    
+    return Task(
+        description=f"""
+        Analyze this Product Initiative Document specifically from a Jobs-to-be-Done perspective.
+        
+        **PID Content to Analyze:**
+        {pid_content}
+        
+        **Jobs-to-be-Done Analysis Framework:**
+        Apply the JTBD methodology to assess how well the problem understanding captures:
+        
+        1. **Job Identification**
+           - Is the user's job-to-be-done clearly articulated?
+           - Is it a functional, emotional, or social job (or combination)?
+           - Is the job framed from the user's perspective?
+           
+        2. **Job Executor vs Job Beneficiary**
+           - Who is executing the job vs who benefits from it?
+           - Are these roles clearly distinguished?
+           - How does this dynamic affect the problem understanding?
+           
+        3. **Desired Progress/Outcome**
+           - What progress is the user trying to make in their life?
+           - How is success defined from the user's perspective?
+           - What does "better" look like for the user?
+           
+        4. **Job Triggers and Context**
+           - What circumstances trigger this job need?
+           - When and where does this job arise?
+           - What environmental factors influence job execution?
+           
+        5. **Job Dimensions Analysis**
+           - **Functional**: What practical task needs to be accomplished?
+           - **Emotional**: How should the user feel during/after job completion?
+           - **Social**: What social signals or identity aspects are involved?
+           
+        6. **Current Job Solutions**
+           - How do users currently "hire" solutions for this job?
+           - What are the existing alternatives and workarounds?
+           - What constraints limit current job execution?
+        
+        **Critical Instructions:**
+        - Focus purely on assessing CURRENT understanding, not suggesting improvements
+        - Identify what JTBD elements are well-defined vs missing/unclear
+        - Use Clayton Christensen's JTBD framework as your assessment standard
+        - Do not suggest solutions, only evaluate problem understanding depth
+        """,
+        expected_output="""
+        ## Jobs-to-be-Done Assessment
+        
+        ### Overall JTBD Understanding Score: [X/10]
+        **Rationale**: Brief explanation of score based on JTBD framework completeness
+        
+        ### Detailed JTBD Analysis
+        
+        #### 1. Job Identification
+        **Assessment**: [Excellent/Good/Fair/Poor/Missing]
+        **Findings**: 
+        - What job is clearly identified
+        - What aspects of job definition are unclear or missing
+        - Whether job is framed from user perspective
+        
+        #### 2. Job Executor vs Job Beneficiary  
+        **Assessment**: [Excellent/Good/Fair/Poor/Missing]
+        **Findings**:
+        - How well executor/beneficiary roles are distinguished
+        - What dynamics are understood vs unclear
+        - Impact on problem understanding
+        
+        #### 3. Desired Progress/Outcome
+        **Assessment**: [Excellent/Good/Fair/Poor/Missing]  
+        **Findings**:
+        - What progress/outcomes are clearly articulated
+        - What aspects of desired progress are missing
+        - How well "success" is defined from user perspective
+        
+        #### 4. Job Triggers and Context
+        **Assessment**: [Excellent/Good/Fair/Poor/Missing]
+        **Findings**:
+        - What triggers and context are identified
+        - What situational factors are missing or unclear
+        - Environmental influences that are/aren't considered
+        
+        #### 5. Job Dimensions Analysis
+        **Functional Dimension**: [Well Defined/Partially Defined/Not Defined]
+        **Emotional Dimension**: [Well Defined/Partially Defined/Not Defined]  
+        **Social Dimension**: [Well Defined/Partially Defined/Not Defined]
+        **Findings**: How well each dimension is captured in current understanding
+        
+        #### 6. Current Job Solutions Understanding
+        **Assessment**: [Excellent/Good/Fair/Poor/Missing]
+        **Findings**:
+        - What current solutions/alternatives are identified
+        - How well existing "job hiring" patterns are understood
+        - What constraints and limitations are recognized
+        
+        ### Critical JTBD Gaps
+        1. **[Gap 1]**: Most critical missing JTBD element
+        2. **[Gap 2]**: Second most critical missing JTBD element  
+        3. **[Gap 3]**: Third most critical missing JTBD element
+        
+        ### JTBD Strengths
+        - What JTBD elements are well-understood in current problem statement
+        - Strongest aspects of current job understanding
+        
+        ### JTBD-Specific Recommendations for Further Analysis
+        - What specific JTBD research is needed
+        - Which job aspects require deeper investigation
+        - What user research would strengthen job understanding
+        
+        **Note**: This assessment focuses purely on evaluating current JTBD understanding depth.
+        """,
+        agent=create_jobs_to_be_done_expert_agent(model)
     )
